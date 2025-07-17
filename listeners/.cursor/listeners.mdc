@@ -1,0 +1,44 @@
+---
+description: 
+globs: *.sol
+alwaysApply: false
+---
+## Sim IDX Listener Patterns
+
+### Contract Structure
+- Main contract extends `BaseTriggers` with `triggers()` function
+- Listener contracts implement generated event interfaces (e.g., `mUSDC$OnMintEvent`)
+- Always import: `import "sim-idx-sol/Simidx.sol";` and `import "sim-idx-generated/Generated.sol";`
+
+### Event Handling
+- Event handlers receive `EventContext` and typed params struct
+- Use `EventContext` to access transaction/block data: `ctx.txn.hash`, `ctx.txn.chainId`
+- When you are handling an event, the events params are in generated structs: `inputs.minter`, `inputs.mintAmount`
+- Emit custom events or call external functions in handlers
+
+### Trigger Registration
+```solidity
+// Register event triggers
+addTrigger(
+    chainContract(Chains.Ethereum, contractAddress),
+    listener.triggerOnEventName()
+);
+
+// Register function triggers  
+addTrigger(
+    chainContract(Chains.Base, contractAddress),
+    listener.triggerOnFunctionName()
+);
+```
+
+### Context Usage
+- `ctx.txn.hash` - transaction hash
+- `ctx.txn.chainId` - chain ID
+- `ctx.txn.call.caller` - transaction sender
+- `ctx.txn.call.callee` - contract being called
+- `block.number`, `block.timestamp` - block data
+
+### Development Workflow
+- Generated code is in `lib/sim-idx-generated/`  
+- Never edit generated files directly
+- Test listeners with Foundry: `sim test`

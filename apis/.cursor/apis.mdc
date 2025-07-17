@@ -1,0 +1,73 @@
+---
+description: 
+globs: *.ts
+alwaysApply: false
+---
+# Sim IDX API Cursor Rules
+
+## Framework & Setup
+- **Sim IDX** wraps Hono + Drizzle on Cloudflare Workers
+- Import: `import { App, db, types } from "sim-idx";`
+- App creation: `const app = App.create();`
+- Database: Use `db.client(c)` inside handlers (never manage connections)
+
+## Core API Pattern
+```typescript
+app.get("/api/resource", async (c) => {
+  try {
+    const rows = await db.client(c)
+      .select()
+      .from(tableName)
+      .limit(10);
+    return Response.json({ data: rows });
+  } catch (e) {
+    console.error("Database operation failed:", e);
+    console.error("Cause:", e.cause);
+    return Response.json({ error: (e as Error).message }, { status: 500 });
+  }
+});
+```
+
+## Database Patterns
+```typescript
+// Basic query
+.select().from(table).limit(n)
+
+// Filtered query  
+.select().from(table).where(eq(column, value))
+
+// Count query
+.select({ total: count() }).from(table);
+
+// Complex filtering
+.where(and(
+  eq(table.field1, value1),
+  gte(table.field2, value2)
+))
+
+// Pagination
+.limit(limit).offset((page - 1) * limit)
+```
+
+## Response Standards
+- Success: `Response.json({ data: result })`
+- Error: `Response.json({ error: message }, { status: code })`
+- Always wrap DB ops in try/catch
+- Log errors with `console.error()`
+
+## Essential Rules
+1. **Always validate parameters** before DB queries
+2. **Use explicit column selection** over SELECT *
+3. **Prefer Drizzle ORM methods** over raw SQL (use `sql` only when needed)
+4. **Implement pagination** with reasonable limits (cap at 100)
+5. **Handle errors gracefully** with structured responses
+6. **Use TypeScript types** from schema imports
+7. **Follow RESTful patterns**: `/api/resource`, `/api/resource/:id`
+8. **Schema auto-generated** in `src/db/schema/` - run `sim build` after changes
+9. **Environment**: `.dev.vars` for local, auto-deploy on git push
+
+## Quick Reference
+- Dev server: `npm run dev` → `http://localhost:8787`
+- Schema location: `apis/src/db/schema/Listener.ts`
+- Import tables: `import { tableName } from "./db/schema/Listener"`
+- Drizzle operators: `eq, gte, lte, and, or, asc, desc` from `drizzle-orm`
