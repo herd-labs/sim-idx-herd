@@ -1,4 +1,4 @@
-# Sim IDX Sample Project
+# Sim IDX Herd
 
 **This is a migration of Herd's sim Studio lambdas to Sim IDX listeners**
 
