@@ -11,12 +11,14 @@ contract Triggers is BaseTriggers {
     struct Listeners {
         TracesListener tracesListener;
         LogsListener logsListener;
+        CreationsListener creationsListener;
     }
 
     function triggers() external virtual override {
         Listeners memory listeners = Listeners({
             tracesListener: new TracesListener(),
-            logsListener: new LogsListener()
+            logsListener: new LogsListener(),
+            creationsListener: new CreationsListener()
         });
         addTrigger(chainAbi(Chains.Base, EntryPoint$Abi()), listeners.tracesListener.triggerPreInnerHandleOpFunction());
         addTrigger(chainGlobal(Chains.Base), listeners.tracesListener.triggerOnCall());
@@ -24,5 +26,8 @@ contract Triggers is BaseTriggers {
         addTrigger(chainAbi(Chains.Base, EntryPoint$Abi()), listeners.logsListener.triggerPreInnerHandleOpFunction());
         addTrigger(chainGlobal(Chains.Base), listeners.logsListener.triggerOnCall());
         addTrigger(chainGlobal(Chains.Base), listeners.logsListener.triggerOnLog());
+
+        addTrigger(chainAbi(Chains.Base, EntryPoint$Abi()), listeners.creationsListener.triggerPreInnerHandleOpFunction());
+        addTrigger(chainGlobal(Chains.Base), listeners.creationsListener.triggerOnCall());
     }
 }
