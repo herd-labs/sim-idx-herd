@@ -48,7 +48,7 @@ struct CreationTraceData {
     uint64 blockNumber;
     uint64 blockTimestamp;
     address contractAddress;
-    string initializationCodeHash;
+    bytes32 initializationCodeHash;
     uint64 initializationCodeLength;
     bytes data;
     bool isFactory;
@@ -67,7 +67,7 @@ struct CreationsData {
     uint64 blockNumber;
     uint64 blockTimestamp;
     address contractAddress;
-    string initializationCodeHash;
+    bytes32 initializationCodeHash;
     uint64 initializationCodeLength;
     bytes32 deployedBytecodeHash;
     uint64 deployedBytecodeLength;

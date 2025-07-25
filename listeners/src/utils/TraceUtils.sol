@@ -32,14 +32,14 @@ contract TraceUtils {
 
     address internal firstTxTo = 0x0000000000000000000000000000000000000000;
 
-    function handleUserOp(RawCallContext memory ctx) internal {
+    function handleUserOp(uint64 callDepth) internal {
         if (isStartOfUserOp) {
             //we can't use the call depth in preInnerHandleOp since it doesn't exist in ctx and is before currentCallDepth updates.
-            userOpCallDepth = uint64(ctx.txn.call.callDepth);
+            userOpCallDepth = callDepth;
         }
         if (
-            smartAccountSender != 0x0000000000000000000000000000000000000000
-                && ctx.txn.call.callDepth <= userOpCallDepth && !isStartOfUserOp
+            smartAccountSender != 0x0000000000000000000000000000000000000000 && callDepth <= userOpCallDepth
+                && !isStartOfUserOp
         ) {
             //reset completely each time a userop is finished
             smartAccountSender = 0x0000000000000000000000000000000000000000;
@@ -50,21 +50,21 @@ contract TraceUtils {
     }
 
     // Update function signature mappings
-    function updateFunctionSignatures(RawCallContext memory ctx) internal returns (bytes4) {
+    function updateFunctionSignatures(uint64 callDepth, bytes memory data) internal returns (bytes4) {
         // Update the mapping with every trace
-        lastFunctionSignature[uint64(ctx.txn.call.callDepth)] = bytes4(ctx.data);
+        lastFunctionSignature[uint64(callDepth)] = bytes4(data);
 
         // The function signature of the parent is the last seen signature at the depth above
         bytes4 parentFunctionSignature;
-        if (ctx.txn.call.callDepth > 0) {
-            parentFunctionSignature = lastFunctionSignature[uint64(ctx.txn.call.callDepth - 1)];
+        if (callDepth > 0) {
+            parentFunctionSignature = lastFunctionSignature[uint64(callDepth - 1)];
         }
 
         return parentFunctionSignature;
     }
 
     // Process trace address and update indices
-    function processTraceAddress(RawCallContext memory ctx) internal returns (string memory) {
+    function processTraceAddress(address calleeAddress, uint64 callDepth) internal returns (string memory) {
         string memory traceAddress;
 
         // Special handling for the first trace in a transaction
@@ -73,26 +73,26 @@ contract TraceUtils {
             lastChildIndex[0] = 0;
             traceAddress = LibString.toString(uint256(0));
             isFirstTraceInTx = false;
-            firstTxTo = ctx.txn.call.callee;
+            firstTxTo = calleeAddress;
         } else {
             // Normal handling for subsequent traces
-            if (ctx.txn.call.callDepth > previousCallDepth) {
+            if (callDepth > previousCallDepth) {
                 // Call depth increased - start new index at 0
-                lastChildIndex[uint64(ctx.txn.call.callDepth)] = 0;
-            } else if (ctx.txn.call.callDepth < previousCallDepth) {
+                lastChildIndex[uint64(callDepth)] = 0;
+            } else if (callDepth < previousCallDepth) {
                 // Call depth decreased - increment the index at the new depth
-                lastChildIndex[uint64(ctx.txn.call.callDepth)]++;
+                lastChildIndex[uint64(callDepth)]++;
             } else {
                 // Same depth - increment the index
-                lastChildIndex[uint64(ctx.txn.call.callDepth)]++;
+                lastChildIndex[uint64(callDepth)]++;
             }
 
             // Generate trace_address string after handling call depth changes
-            traceAddress = generateTraceAddress(uint256(ctx.txn.call.callDepth));
+            traceAddress = generateTraceAddress(uint256(callDepth));
         }
 
         // Update previous call depth for next call
-        previousCallDepth = ctx.txn.call.callDepth;
+        previousCallDepth = callDepth;
 
         return traceAddress;
     }
