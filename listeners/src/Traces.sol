@@ -5,19 +5,28 @@ import "./utils/TraceUtils.sol";
 import "./types/Structs.sol";
 import "sim-idx-generated/Generated.sol";
 
-contract TracesListener is Raw$OnCall, EntryPoint$PreInnerHandleOpFunction, TraceUtils {
+contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpFunction, TraceUtils {
+    event TracesEthereum(TracesData);
     event TracesBase(TracesData);
 
-    function preInnerHandleOpFunction(
-        PreFunctionContext memory ,
-        EntryPoint$InnerHandleOpFunctionInputs memory inputs
-    ) external override {
+    function emitTraces(TracesData memory data, uint256 chainId) internal {
+        if (chainId == 1) {
+            emit TracesEthereum(data);
+        } else if (chainId == 8453) {
+            emit TracesBase(data);
+        }
+    }
+
+    function preInnerHandleOpFunction(PreFunctionContext memory, EntryPoint$InnerHandleOpFunctionInputs memory inputs)
+        external
+        override
+    {
         smartAccountSender = inputs.opInfo.mUserOp.sender;
         isStartOfUserOp = true;
     }
 
     function onCall(RawCallContext memory ctx) external override {
-        if (ctx.txn.call.callDepth == 0) {
+        if (ctx.txn.call.callDepth() == 0) {
             // Reset the mapping state when transaction is complete
             // Only loop up to the maximum call depth we've seen plus 1
             for (uint64 i = 0; i <= maxCallDepthSeen; i++) {
@@ -34,7 +43,53 @@ contract TracesListener is Raw$OnCall, EntryPoint$PreInnerHandleOpFunction, Trac
         }
     }
 
-    /** 
-     * TODO: Add a preCall trigger whenever we implement this trigger.
-    */
+    function onPreCall(RawPreCallContext memory ctx) external override {
+        if (uint64(ctx.txn.call.callDepth()) > maxCallDepthSeen) {
+            maxCallDepthSeen = uint64(ctx.txn.call.callDepth());
+        }
+        if (isFirstTraceInTx) {
+            lastChildIndex[0] = 0;
+            isFirstTraceInTx = false;
+        }
+
+        currentCallDepth = uint64(ctx.txn.call.callDepth());
+
+        // Handle UserOp logic. this runs after the preInnerHandleOp.
+        handleUserOp(uint64(ctx.txn.call.callDepth()));
+
+        // Process trace address and update indices
+        string memory traceAddress = processTraceAddress(ctx.txn.call.callee(), uint64(ctx.txn.call.callDepth()));
+
+        // Update function signature mappings
+        bytes4 parentFunctionSignature =
+            updateFunctionSignatures(uint64(ctx.txn.call.callDepth()), ctx.txn.call.callData());
+
+        if (uint64(ctx.txn.call.callType()) == 3) {
+            caller = ctx.txn.call.delegator();
+            callee = ctx.txn.call.delegatee();
+        } else {
+            caller = ctx.txn.call.caller();
+            callee = ctx.txn.call.callee();
+        }
+
+        emitTraces(
+            TracesData({
+                blockNumber: uint64(block.number),
+                blockTimestamp: uint64(block.timestamp),
+                txnHash: ctx.txn.hash(),
+                caller: caller,
+                callee: callee,
+                funcSig: bytes4(ctx.txn.call.callData()),
+                parentFuncSig: parentFunctionSignature,
+                txFrom: tx.origin,
+                txTo: firstTxTo,
+                callType: uint64(ctx.txn.call.callType()),
+                userOpFrom: smartAccountSender,
+                callDepth: uint64(ctx.txn.call.callDepth()),
+                traceAddress: traceAddress,
+                success: ctx.txn.isSuccessful()
+            }),
+            block.chainid
+        );
+    }
 }
