@@ -8,32 +8,33 @@ import "./Logs.sol";
 import "./Creations.sol";
 
 contract Triggers is BaseTriggers {
-    // avoid stack too deep
-    struct Listeners {
-        TracesListener tracesListener;
-        LogsListener logsListener;
-        CreationsListener creationsListener;
+    function triggers() external virtual override {
+        tracesTriggers();
+        logsTriggers();
+        creationsTriggers();
     }
 
-    function triggers() external virtual override {
-        Listeners memory listeners = Listeners({
-            tracesListener: new TracesListener(),
-            logsListener: new LogsListener(),
-            creationsListener: new CreationsListener()
-        });
-        addTrigger(chainAbi(Chains.Base, EntryPoint$Abi()), listeners.tracesListener.triggerPreInnerHandleOpFunction());
-        addTrigger(chainGlobal(Chains.Base), listeners.tracesListener.triggerOnCall());
-        addTrigger(chainGlobal(Chains.Base), listeners.tracesListener.triggerOnPreCall());
+    function tracesTriggers() internal {
+        TracesListener tracesListener = new TracesListener();
+        addTrigger(chainAbi(Chains.Base, EntryPoint$Abi()), tracesListener.triggerPreInnerHandleOpFunction());
+        addTrigger(chainGlobal(Chains.Base), tracesListener.triggerOnCall());
+        addTrigger(chainGlobal(Chains.Base), tracesListener.triggerOnPreCall());
+    }
 
-        addTrigger(chainAbi(Chains.Base, EntryPoint$Abi()), listeners.logsListener.triggerPreInnerHandleOpFunction());
-        addTrigger(chainGlobal(Chains.Base), listeners.logsListener.triggerOnCall());
-        addTrigger(chainGlobal(Chains.Base), listeners.logsListener.triggerOnLog());
-        addTrigger(chainGlobal(Chains.Base), listeners.logsListener.triggerOnPreCall());
+    function logsTriggers() internal {
+        LogsListener logsListener = new LogsListener();
+        addTrigger(chainAbi(Chains.Base, EntryPoint$Abi()), logsListener.triggerPreInnerHandleOpFunction());
+        addTrigger(chainGlobal(Chains.Base), logsListener.triggerOnCall());
+        addTrigger(chainGlobal(Chains.Base), logsListener.triggerOnLog());
+        addTrigger(chainGlobal(Chains.Base), logsListener.triggerOnPreCall());
+    }
 
+    function creationsTriggers() internal {
+        CreationsListener creationsListener = new CreationsListener();
         addTrigger(
-            chainAbi(Chains.Base, EntryPoint$Abi()), listeners.creationsListener.triggerPreInnerHandleOpFunction()
+            chainAbi(Chains.Base, EntryPoint$Abi()), creationsListener.triggerPreInnerHandleOpFunction()
         );
-        addTrigger(chainGlobal(Chains.Base), listeners.creationsListener.triggerOnCall());
-        addTrigger(chainGlobal(Chains.Base), listeners.creationsListener.triggerOnPreCall());
+        addTrigger(chainGlobal(Chains.Base), creationsListener.triggerOnCall());
+        addTrigger(chainGlobal(Chains.Base), creationsListener.triggerOnPreCall());
     }
 }
