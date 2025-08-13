@@ -9,32 +9,37 @@ import "./Creations.sol";
 
 contract Triggers is BaseTriggers {
     function triggers() external virtual override {
-        tracesTriggers();
-        logsTriggers();
-        creationsTriggers();
+        tracesTriggers(Chains.Base, 34146634);
+        logsTriggers(Chains.Base, 34146634);
+        creationsTriggers(Chains.Base, 34146634);
+
+        tracesTriggers(Chains.Ethereum, 23131640);
+        logsTriggers(Chains.Ethereum, 23131640);
+        creationsTriggers(Chains.Ethereum, 23131640);
     }
 
-    function tracesTriggers() internal {
+    function tracesTriggers(Chains chain, uint64 startBlock) internal {
         TracesListener tracesListener = new TracesListener();
-        addTrigger(chainAbi(Chains.Base, EntryPoint$Abi()), tracesListener.triggerPreInnerHandleOpFunction());
-        addTrigger(chainGlobal(Chains.Base), tracesListener.triggerOnCall());
-        addTrigger(chainGlobal(Chains.Base), tracesListener.triggerOnPreCall());
+
+        addTrigger(chainAbi(chain.withStartBlock(startBlock), EntryPoint$Abi()), tracesListener.triggerPreInnerHandleOpFunction());
+        addTrigger(chainGlobal(chain.withStartBlock(startBlock)), tracesListener.triggerOnCall());
+        addTrigger(chainGlobal(chain.withStartBlock(startBlock)), tracesListener.triggerOnPreCall());
     }
 
-    function logsTriggers() internal {
+    function logsTriggers(Chains chain, uint64 startBlock) internal {
         LogsListener logsListener = new LogsListener();
-        addTrigger(chainAbi(Chains.Base, EntryPoint$Abi()), logsListener.triggerPreInnerHandleOpFunction());
-        addTrigger(chainGlobal(Chains.Base), logsListener.triggerOnCall());
-        addTrigger(chainGlobal(Chains.Base), logsListener.triggerOnLog());
-        addTrigger(chainGlobal(Chains.Base), logsListener.triggerOnPreCall());
+        addTrigger(chainAbi(chain.withStartBlock(startBlock), EntryPoint$Abi()), logsListener.triggerPreInnerHandleOpFunction());
+        addTrigger(chainGlobal(chain.withStartBlock(startBlock)), logsListener.triggerOnCall());
+        addTrigger(chainGlobal(chain.withStartBlock(startBlock)), logsListener.triggerOnLog());
+        addTrigger(chainGlobal(chain.withStartBlock(startBlock)), logsListener.triggerOnPreCall());
     }
 
-    function creationsTriggers() internal {
+    function creationsTriggers(Chains chain, uint64 startBlock) internal {
         CreationsListener creationsListener = new CreationsListener();
         addTrigger(
-            chainAbi(Chains.Base, EntryPoint$Abi()), creationsListener.triggerPreInnerHandleOpFunction()
+            chainAbi(chain.withStartBlock(startBlock), EntryPoint$Abi()), creationsListener.triggerPreInnerHandleOpFunction()
         );
-        addTrigger(chainGlobal(Chains.Base), creationsListener.triggerOnCall());
-        addTrigger(chainGlobal(Chains.Base), creationsListener.triggerOnPreCall());
+        addTrigger(chainGlobal(chain.withStartBlock(startBlock)), creationsListener.triggerOnCall());
+        addTrigger(chainGlobal(chain.withStartBlock(startBlock)), creationsListener.triggerOnPreCall());
     }
 }
