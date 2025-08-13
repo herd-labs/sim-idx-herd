@@ -11,12 +11,15 @@ contract LogsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpF
 
     event LogsEthereum(LogsData);
     event LogsBase(LogsData);
+    event LogsArbitrum(LogsData);
 
     function emitLogs(LogsData memory data, uint256 chainId) internal {
         if (chainId == 1) {
             emit LogsEthereum(data);
         } else if (chainId == 8453) {
             emit LogsBase(data);
+        } else if (chainId == 42161) {
+            emit LogsArbitrum(data);
         }
     }
 

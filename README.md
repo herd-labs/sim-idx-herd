@@ -4,6 +4,11 @@
 
 Original canvas: https://studio.sim.io/ilemi/canvases/87b6a422-0a1e-43ca-944a-f21c49873b43
 
+Steps to adding a new chain:
+- change triggers in Main.sol
+- add event listeners across traces/logs/creations
+- deploy prod
+
 # Deployments
 
 ```

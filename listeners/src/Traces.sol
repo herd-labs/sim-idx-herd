@@ -8,12 +8,15 @@ import "sim-idx-generated/Generated.sol";
 contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpFunction, TraceUtils {
     event TracesEthereum(TracesData);
     event TracesBase(TracesData);
+    event TracesArbitrum(TracesData);
 
     function emitTraces(TracesData memory data, uint256 chainId) internal {
         if (chainId == 1) {
             emit TracesEthereum(data);
         } else if (chainId == 8453) {
             emit TracesBase(data);
+        } else if (chainId == 42161) {
+            emit TracesArbitrum(data);
         }
     }
 
