@@ -1,2 +1,19 @@
 [app]
 name = "sim-idx-andrew"
+
+[[env.prod.sinks]]
+type = "kafka"
+name = "prod"
+password = "${KAFKA_PROD_PASSWORD}" # Read from .env file
+username = "${KAFKA_PROD_USERNAME}"
+sasl_mechanism = "SCRAM_SHA_256"
+compression_type = "ZSTD"
+brokers = ["pkc-619z3.us-east1.gcp.confluent.cloud:9092"]
+
+  [env.prod.sinks.event_to_topic]
+  CreationsEthereum = "creations_ethereum" # TODO
+  CreationsBase = "creations_base" # TODO
+  LogsEthereum = "logs_ethereum" # TODO
+  LogsBase = "logs_base" # TODO
+  TracesEthereum = "traces_ethereum" # TODO
+  TracesBase = "traces_base" # TODO
