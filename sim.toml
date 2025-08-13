@@ -11,9 +11,9 @@ compression_type = "ZSTD"
 brokers = ["pkc-619z3.us-east1.gcp.confluent.cloud:9092"]
 
   [env.prod.sinks.event_to_topic]
-  CreationsEthereum = "creations_ethereum" # TODO
-  CreationsBase = "creations_base" # TODO
-  LogsEthereum = "logs_ethereum" # TODO
-  LogsBase = "logs_base" # TODO
-  TracesEthereum = "traces_ethereum" # TODO
-  TracesBase = "traces_base" # TODO
+  TracesEthereum = "ethereum_traces" 
+  CreationsEthereum = "ethereum_creation_traces" 
+  LogsEthereum = "ethereum_logs" 
+  TracesBase = "base_traces_v2" 
+  CreationsBase = "base_creation_traces" 
+  LogsBase = "base_logs" 
