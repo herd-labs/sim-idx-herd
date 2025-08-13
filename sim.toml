@@ -6,7 +6,7 @@ type = "kafka"
 name = "prod"
 password = "${KAFKA_PROD_PASSWORD}" # Read from .env file
 username = "${KAFKA_PROD_USERNAME}"
-sasl_mechanism = "SCRAM_SHA_256"
+sasl_mechanism = "PLAIN"
 compression_type = "ZSTD"
 brokers = ["pkc-619z3.us-east1.gcp.confluent.cloud:9092"]
 
