@@ -16,8 +16,5 @@ brokers = ["pkc-619z3.us-east1.gcp.confluent.cloud:9092"]
   LogsEthereum = "ethereum_logs" 
   TracesBase = "base_traces_v2" 
   CreationsBase = "base_creation_traces" 
-  LogsBase = "base_logs" 
-  TracesArbitrum = "arbitrum_traces" 
-  CreationsArbitrum = "arbitrum_creation_traces" 
-  LogsArbitrum = "arbitrum_logs" 
+  LogsBase = "base_logs"
 
