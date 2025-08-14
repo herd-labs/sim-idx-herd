@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./utils/TraceUtils.sol";
 import "./types/Structs.sol";
+import "./lib/LibString.sol";
 import "sim-idx-generated/Generated.sol";
 
 contract LogsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpFunction, Raw$OnLog, TraceUtils {
@@ -54,22 +55,22 @@ contract LogsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpF
 
         emitLogs(
             LogsData({
-                contractAddress: ctx.txn.call.callee(),
-                topic0: ctx.topics().length > 0 ? ctx.topics()[0] : bytes32(0),
-                topic1: ctx.topics().length > 1 ? ctx.topics()[1] : bytes32(0),
-                topic2: ctx.topics().length > 2 ? ctx.topics()[2] : bytes32(0),
-                topic3: ctx.topics().length > 3 ? ctx.topics()[3] : bytes32(0),
-                data: ctx.data(),
-                txnHash: ctx.txn.hash(),
+                contractAddress: LibString.toHexString(ctx.txn.call.callee()),
+                topic0: ctx.topics().length > 0 ? LibString.toHexString(abi.encodePacked(ctx.topics()[0])) : "0x0000000000000000000000000000000000000000000000000000000000000000",
+                topic1: ctx.topics().length > 1 ? LibString.toHexString(abi.encodePacked(ctx.topics()[1])) : "0x0000000000000000000000000000000000000000000000000000000000000000",
+                topic2: ctx.topics().length > 2 ? LibString.toHexString(abi.encodePacked(ctx.topics()[2])) : "0x0000000000000000000000000000000000000000000000000000000000000000",
+                topic3: ctx.topics().length > 3 ? LibString.toHexString(abi.encodePacked(ctx.topics()[3])) : "0x0000000000000000000000000000000000000000000000000000000000000000",
+                data: LibString.toHexString(ctx.data()),
+                txnHash: LibString.toHexString(abi.encodePacked(ctx.txn.hash())),
                 blockNumber: uint64(block.number),
                 blockTimestamp: uint64(block.timestamp),
                 evtIndex: logIndex,
                 traceFrom: contractCallInfo[ctx.txn.call.callee()].traceFrom,
-                txFrom: tx.origin,
-                txTo: firstTxTo,
+                txFrom: LibString.toHexString(tx.origin),
+                txTo: LibString.toHexString(firstTxTo),
                 originalCallDepth: contractCallInfo[ctx.txn.call.callee()].callDepth,
                 emittedAfterTraceAddress: generateTraceAddress(currentCallDepth),
-                userOpFrom: smartAccountSender,
+                userOpFrom: LibString.toHexString(smartAccountSender),
                 funcSig: contractCallInfo[ctx.txn.call.callee()].funcSig
             }),
             block.chainid
@@ -93,8 +94,8 @@ contract LogsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpF
         // Store the current call depth and function signature for the callee contract
         contractCallInfo[ctx.txn.call.callee()] = ContractCallInfo({
             callDepth: currentCallDepth,
-            traceFrom: ctx.txn.call.caller(),
-            funcSig: bytes4(ctx.txn.call.callData())
+            traceFrom: LibString.toHexString(ctx.txn.call.caller()),
+            funcSig: LibString.toHexString(abi.encodePacked(bytes4(ctx.txn.call.callData())))
         });
 
         // Process trace address and update indices

@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./utils/TraceUtils.sol";
 import "./types/Structs.sol";
+import "./lib/LibString.sol";
 import "sim-idx-generated/Generated.sol";
 
 contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpFunction, TraceUtils {
@@ -64,8 +65,9 @@ contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleO
         string memory traceAddress = processTraceAddress(ctx.txn.call.callee(), uint64(ctx.txn.call.callDepth()));
 
         // Update function signature mappings
-        bytes4 parentFunctionSignature =
+        bytes4 parentFunctionSignatureBytes =
             updateFunctionSignatures(uint64(ctx.txn.call.callDepth()), ctx.txn.call.callData());
+        string memory parentFunctionSignature = LibString.toHexString(abi.encodePacked(parentFunctionSignatureBytes));
 
         if (uint64(ctx.txn.call.callType()) == 3) {
             caller = ctx.txn.call.delegator();
@@ -79,15 +81,15 @@ contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleO
             TracesData({
                 blockNumber: uint64(block.number),
                 blockTimestamp: uint64(block.timestamp),
-                txnHash: ctx.txn.hash(),
-                caller: caller,
-                callee: callee,
-                funcSig: bytes4(ctx.txn.call.callData()),
+                txnHash: LibString.toHexString(abi.encodePacked(ctx.txn.hash())),
+                caller: LibString.toHexString(caller),
+                callee: LibString.toHexString(callee),
+                funcSig: LibString.toHexString(abi.encodePacked(bytes4(ctx.txn.call.callData()))),
                 parentFuncSig: parentFunctionSignature,
-                txFrom: tx.origin,
-                txTo: firstTxTo,
+                txFrom: LibString.toHexString(tx.origin),
+                txTo: LibString.toHexString(firstTxTo),
                 callType: uint64(ctx.txn.call.callType()),
-                userOpFrom: smartAccountSender,
+                userOpFrom: LibString.toHexString(smartAccountSender),
                 callDepth: uint64(ctx.txn.call.callDepth()),
                 traceAddress: traceAddress,
                 success: ctx.txn.isSuccessful()

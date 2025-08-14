@@ -4,14 +4,14 @@ pragma solidity ^0.8.13;
 struct TracesData {
     uint64 blockTimestamp;
     uint64 blockNumber;
-    bytes32 txnHash;
-    address caller;
-    address callee;
-    bytes4 funcSig;
-    bytes4 parentFuncSig;
-    address txFrom;
-    address txTo;
-    address userOpFrom;
+    string txnHash;
+    string caller;
+    string callee;
+    string funcSig;
+    string parentFuncSig;
+    string txFrom;
+    string txTo;
+    string userOpFrom;
     uint64 callDepth;
     string traceAddress;
     bool success;
@@ -19,67 +19,67 @@ struct TracesData {
 }
 
 struct LogsData {
-    address contractAddress;
-    bytes32 topic0;
-    bytes32 topic1;
-    bytes32 topic2;
-    bytes32 topic3;
-    bytes data;
-    bytes32 txnHash;
+    string contractAddress;
+    string topic0;
+    string topic1;
+    string topic2;
+    string topic3;
+    string data;
+    string txnHash;
     uint64 blockNumber;
     uint64 blockTimestamp;
     uint64 evtIndex;
-    address traceFrom;
-    address txFrom;
-    address txTo;
+    string traceFrom;
+    string txFrom;
+    string txTo;
     uint64 originalCallDepth;
     string emittedAfterTraceAddress;
-    address userOpFrom;
-    bytes4 funcSig;
+    string userOpFrom;
+    string funcSig;
 }
 
 struct ContractCallInfo {
-    address traceFrom;
+    string traceFrom;
     uint64 callDepth;
-    bytes4 funcSig;
+    string funcSig;
 }
 
 struct CreationTraceData {
     uint64 blockNumber;
     uint64 blockTimestamp;
-    address contractAddress;
-    bytes32 initializationCodeHash;
+    string contractAddress;
+    string initializationCodeHash;
     uint64 initializationCodeLength;
-    bytes data;
+    string data;
     bool isFactory;
     bool directDeploy;
-    address deployerAddress;
+    string deployerAddress;
     string deployerType;
-    address factoryAddress;
+    string factoryAddress;
     string deploymentType;
-    bytes4 factoryFuncSig;
-    address factoryCaller;
-    address txFrom;
-    address txTo;
+    string factoryFuncSig;
+    string factoryCaller;
+    string txFrom;
+    string txTo;
 }
 
 struct CreationsData {
     uint64 blockNumber;
     uint64 blockTimestamp;
-    address contractAddress;
-    bytes32 initializationCodeHash;
+    string contractAddress;
+    string initializationCodeHash;
     uint64 initializationCodeLength;
-    bytes32 deployedBytecodeHash;
+    string deployedBytecodeHash;
     uint64 deployedBytecodeLength;
-    bytes32 txnHash;
+    string txnHash;
     bool isFactory;
     bool directDeploy;
-    address deployerAddress;
+    string deployerAddress;
     string deployerType;
-    address factoryAddress;
+    string factoryAddress;
     string deploymentType;
-    address txFrom;
-    address txTo;
-    bytes4 factoryFuncSig;
-    address factoryCaller;
+    string txFrom;
+    string txTo;
+    string factoryFuncSig;
+    string factoryCaller;
 }

@@ -3,11 +3,12 @@ pragma solidity ^0.8.13;
 
 import "./utils/TraceUtils.sol";
 import "./types/Structs.sol";
+import "./lib/LibString.sol";
 import "sim-idx-generated/Generated.sol";
 
 contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpFunction, TraceUtils {
     //resets in every trace
-    bytes4 factoryFuncSig = 0x00000000;
+    bytes4 factoryFuncSigBytes = 0x00000000;
     //resets in every trace
     address factoryCaller = 0x0000000000000000000000000000000000000000;
 
@@ -63,9 +64,9 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
                         contractAddress: traceData.contractAddress,
                         initializationCodeHash: traceData.initializationCodeHash,
                         initializationCodeLength: traceData.initializationCodeLength,
-                        deployedBytecodeHash: sha256(deployedBytecode),
+                        deployedBytecodeHash: LibString.toHexString(abi.encodePacked(sha256(deployedBytecode))),
                         deployedBytecodeLength: uint64(deployedBytecode.length) * 2 + 2,
-                        txnHash: ctx.txn.hash(),
+                        txnHash: LibString.toHexString(abi.encodePacked(ctx.txn.hash())),
                         isFactory: traceData.isFactory,
                         directDeploy: traceData.directDeploy,
                         deployerAddress: traceData.deployerAddress,
@@ -110,8 +111,8 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
         // Store the latest function signature for the callee contract
         contractCallInfo[ctx.txn.call.callee()] = ContractCallInfo({
             callDepth: currentCallDepth,
-            traceFrom: ctx.txn.call.caller(),
-            funcSig: bytes4(ctx.txn.call.callData())
+            traceFrom: LibString.toHexString(ctx.txn.call.caller()),
+            funcSig: LibString.toHexString(abi.encodePacked(bytes4(ctx.txn.call.callData())))
         });
 
         //only process if deployment trace. DO NOT PUT ANY GENERIC LOGIC BELOW THAT NEEDS TO BE TRACKED THROUGH ALL TRACES.
@@ -153,23 +154,27 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
                         && ctx.txn.call.callType() == CallType.CREATE2
                 ) {
                     call_type_string = "CREATE3";
-                    // Use the original factory that created this factory
-                    factoryAddress = pendingCreationTraces[factoryAddress].factoryAddress;
+                    // For CREATE3, we need to get the original factory address
+                    // This requires us to store it differently - let's handle this case separately
                 }
             } else {
                 // Deployer is an EOA
                 isFactory = false;
-                factoryFuncSig = 0x00000000; //we def have some contracts that carried the factory funcsig from a previous factory creation in the same txn
+                factoryFuncSigBytes = 0x00000000; //we def have some contracts that carried the factory funcsig from a previous factory creation in the same txn
                 factoryCaller = 0x0000000000000000000000000000000000000000;
             }
 
             // after factory_address is finalized, get the function signature called on the factory.
+            string memory factoryFuncSigStr;
             if (isFactory) {
-                factoryFuncSig = contractCallInfo[factoryAddress].funcSig;
+                // contractCallInfo[factoryAddress].funcSig is already a hex string
+                factoryFuncSigStr = contractCallInfo[factoryAddress].funcSig;
                 if (factoryCaller != tx.origin) {
                     //we only care if it's a contract that called the factory
-                    factoryCaller = contractCallInfo[factoryAddress].traceFrom;
+                    factoryCaller = ctx.txn.call.caller(); // This will be converted to string when emitting
                 }
+            } else {
+                factoryFuncSigStr = LibString.toHexString(abi.encodePacked(factoryFuncSigBytes));
             }
 
             // Determine deployer address and type based on smart account sender
@@ -190,20 +195,20 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
             pendingCreationTraces[ctx.txn.call.callee()] = CreationTraceData({
                 blockNumber: uint64(block.number),
                 blockTimestamp: uint64(block.timestamp),
-                contractAddress: ctx.txn.call.callee(),
-                initializationCodeHash: sha256(abi.encodePacked(ctx.txn.call.callData())),
+                contractAddress: LibString.toHexString(ctx.txn.call.callee()),
+                initializationCodeHash: LibString.toHexString(abi.encodePacked(sha256(abi.encodePacked(ctx.txn.call.callData())))),
                 initializationCodeLength: uint64(ctx.txn.call.callData().length) * 2 + 2,
-                data: ctx.txn.call.callData(),
+                data: LibString.toHexString(ctx.txn.call.callData()),
                 isFactory: isFactory,
                 directDeploy: (firstTxTo == ctx.txn.call.callee()),
-                deployerAddress: deployerAddress,
+                deployerAddress: LibString.toHexString(deployerAddress),
                 deployerType: deployerType,
-                factoryAddress: factoryAddress,
+                factoryAddress: LibString.toHexString(factoryAddress),
                 deploymentType: call_type_string,
-                factoryFuncSig: factoryFuncSig,
-                factoryCaller: factoryCaller,
-                txFrom: tx.origin,
-                txTo: firstTxTo
+                factoryFuncSig: factoryFuncSigStr,
+                factoryCaller: LibString.toHexString(factoryCaller),
+                txFrom: LibString.toHexString(tx.origin),
+                txTo: LibString.toHexString(firstTxTo)
             });
 
             // Mark this contract as created in this transaction

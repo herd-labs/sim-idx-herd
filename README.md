@@ -36,6 +36,8 @@ sim build
 sim listeners evaluate --start-block=23131640 --end-block=23131641 --chain-id=1
 ```
 
+sim listeners evaluate --start-block=34190545 --end-block=34190546 --chain-id=8453 --listeners traces
+
 ## Running Forge tests
 ```
 sim test
