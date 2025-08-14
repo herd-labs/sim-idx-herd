@@ -57,6 +57,10 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
                 bytes memory deployedBytecode = contractAddress.code;
 
                 // Emit the creation trace with the deployed bytecode information
+                // Break down hex conversions to avoid stack too deep
+                string memory deployedBytecodeHashHex = LibString.toHexString(abi.encodePacked(sha256(deployedBytecode)));
+                string memory txnHashHex = LibString.toHexString(abi.encodePacked(ctx.txn.hash()));
+                
                 emitCreations(
                     CreationsData({
                         blockNumber: traceData.blockNumber,
@@ -64,9 +68,9 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
                         contractAddress: traceData.contractAddress,
                         initializationCodeHash: traceData.initializationCodeHash,
                         initializationCodeLength: traceData.initializationCodeLength,
-                        deployedBytecodeHash: LibString.toHexString(abi.encodePacked(sha256(deployedBytecode))),
+                        deployedBytecodeHash: deployedBytecodeHashHex,
                         deployedBytecodeLength: uint64(deployedBytecode.length) * 2 + 2,
-                        txnHash: LibString.toHexString(abi.encodePacked(ctx.txn.hash())),
+                        txnHash: txnHashHex,
                         isFactory: traceData.isFactory,
                         directDeploy: traceData.directDeploy,
                         deployerAddress: traceData.deployerAddress,
@@ -192,30 +196,47 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
             }
 
             // Store creation trace data for processing in postTransactionTo
-            pendingCreationTraces[ctx.txn.call.callee()] = CreationTraceData({
-                blockNumber: uint64(block.number),
-                blockTimestamp: uint64(block.timestamp),
-                contractAddress: LibString.toHexString(ctx.txn.call.callee()),
-                initializationCodeHash: LibString.toHexString(abi.encodePacked(sha256(abi.encodePacked(ctx.txn.call.callData())))),
-                initializationCodeLength: uint64(ctx.txn.call.callData().length) * 2 + 2,
-                data: LibString.toHexString(ctx.txn.call.callData()),
+            // Break down all calculations to avoid stack too deep
+            bytes memory callDataBytes = ctx.txn.call.callData();
+            address calleeAddress = ctx.txn.call.callee();
+            uint64 currentBlockNumber = uint64(block.number);
+            uint64 currentBlockTimestamp = uint64(block.timestamp);
+            uint64 callDataLength = uint64(callDataBytes.length) * 2 + 2;
+            bool isDirectDeploy = (firstTxTo == calleeAddress);
+            
+            string memory contractAddressHex = LibString.toHexString(calleeAddress);
+            string memory initCodeHashHex = LibString.toHexString(abi.encodePacked(sha256(abi.encodePacked(callDataBytes))));
+            string memory dataHex = LibString.toHexString(callDataBytes);
+            string memory deployerAddressHex = LibString.toHexString(deployerAddress);
+            string memory factoryAddressHex = LibString.toHexString(factoryAddress);
+            string memory factoryCallerHex = LibString.toHexString(factoryCaller);
+            string memory txFromHex = LibString.toHexString(tx.origin);
+            string memory txToHex = LibString.toHexString(firstTxTo);
+            
+            pendingCreationTraces[calleeAddress] = CreationTraceData({
+                blockNumber: currentBlockNumber,
+                blockTimestamp: currentBlockTimestamp,
+                contractAddress: contractAddressHex,
+                initializationCodeHash: initCodeHashHex,
+                initializationCodeLength: callDataLength,
+                data: dataHex,
                 isFactory: isFactory,
-                directDeploy: (firstTxTo == ctx.txn.call.callee()),
-                deployerAddress: LibString.toHexString(deployerAddress),
+                directDeploy: isDirectDeploy,
+                deployerAddress: deployerAddressHex,
                 deployerType: deployerType,
-                factoryAddress: LibString.toHexString(factoryAddress),
+                factoryAddress: factoryAddressHex,
                 deploymentType: call_type_string,
                 factoryFuncSig: factoryFuncSigStr,
-                factoryCaller: LibString.toHexString(factoryCaller),
-                txFrom: LibString.toHexString(tx.origin),
-                txTo: LibString.toHexString(firstTxTo)
+                factoryCaller: factoryCallerHex,
+                txFrom: txFromHex,
+                txTo: txToHex
             });
 
             // Mark this contract as created in this transaction
-            contractsCreatedInTx[ctx.txn.call.callee()] = true;
+            contractsCreatedInTx[calleeAddress] = true;
 
             // Add contract address to the list for processing
-            contractsToProcess.push(ctx.txn.call.callee());
+            contractsToProcess.push(calleeAddress);
 
             // this always gets set to the factory address of this trace, resetting to null address if no factory
             lastFactoryAddress = factoryAddress;
