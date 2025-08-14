@@ -67,23 +67,23 @@ contract LogsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpF
 
         emitLogs(
             LogsData({
-                contractAddress: contractAddressHex,
+                contract_address: contractAddressHex,
                 topic0: topic0Hex,
                 topic1: topic1Hex,
                 topic2: topic2Hex,
                 topic3: topic3Hex,
                 data: dataHex,
-                txnHash: txnHashHex,
-                blockNumber: uint64(block.number),
-                blockTimestamp: uint64(block.timestamp),
-                evtIndex: logIndex,
-                traceFrom: contractCallInfo[ctx.txn.call.callee()].traceFrom,
-                txFrom: txFromHex,
-                txTo: txToHex,
-                originalCallDepth: contractCallInfo[ctx.txn.call.callee()].callDepth,
-                emittedAfterTraceAddress: generateTraceAddress(currentCallDepth),
-                userOpFrom: userOpFromHex,
-                funcSig: contractCallInfo[ctx.txn.call.callee()].funcSig
+                txn_hash: txnHashHex,
+                block_number: uint64(block.number),
+                block_timestamp: uint64(block.timestamp),
+                evt_index: logIndex,
+                trace_from: contractCallInfo[ctx.txn.call.callee()].trace_from,
+                tx_from: txFromHex,
+                tx_to: txToHex,
+                original_call_depth: contractCallInfo[ctx.txn.call.callee()].call_depth,
+                emitted_after_trace_address: generateTraceAddress(currentCallDepth),
+                user_op_from: userOpFromHex,
+                func_sig: contractCallInfo[ctx.txn.call.callee()].func_sig
             }),
             block.chainid
         );
@@ -105,9 +105,9 @@ contract LogsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpF
 
         // Store the current call depth and function signature for the callee contract
         contractCallInfo[ctx.txn.call.callee()] = ContractCallInfo({
-            callDepth: currentCallDepth,
-            traceFrom: LibString.toHexString(ctx.txn.call.caller()),
-            funcSig: LibString.toHexString(abi.encodePacked(bytes4(ctx.txn.call.callData())))
+            call_depth: currentCallDepth,
+            trace_from: LibString.toHexString(ctx.txn.call.caller()),
+            func_sig: LibString.toHexString(abi.encodePacked(bytes4(ctx.txn.call.callData())))
         });
 
         // Process trace address and update indices

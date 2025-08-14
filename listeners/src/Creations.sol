@@ -63,24 +63,24 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
                 
                 emitCreations(
                     CreationsData({
-                        blockNumber: traceData.blockNumber,
-                        blockTimestamp: traceData.blockTimestamp,
-                        contractAddress: traceData.contractAddress,
-                        initializationCodeHash: traceData.initializationCodeHash,
-                        initializationCodeLength: traceData.initializationCodeLength,
-                        deployedBytecodeHash: deployedBytecodeHashHex,
-                        deployedBytecodeLength: uint64(deployedBytecode.length) * 2 + 2,
-                        txnHash: txnHashHex,
-                        isFactory: traceData.isFactory,
-                        directDeploy: traceData.directDeploy,
-                        deployerAddress: traceData.deployerAddress,
-                        deployerType: traceData.deployerType,
-                        factoryAddress: traceData.factoryAddress,
-                        deploymentType: traceData.deploymentType,
-                        txFrom: traceData.txFrom,
-                        txTo: traceData.txTo,
-                        factoryFuncSig: traceData.factoryFuncSig,
-                        factoryCaller: traceData.factoryCaller
+                        block_number: traceData.block_number,
+                        block_timestamp: traceData.block_timestamp,
+                        contract_address: traceData.contract_address,
+                        initialization_code_hash: traceData.initialization_code_hash,
+                        initialization_code_length: traceData.initialization_code_length,
+                        deployed_bytecode_hash: deployedBytecodeHashHex,
+                        deployed_bytecode_length: uint64(deployedBytecode.length) * 2 + 2,
+                        txn_hash: txnHashHex,
+                        is_factory: traceData.is_factory,
+                        direct_deploy: traceData.direct_deploy,
+                        deployer_address: traceData.deployer_address,
+                        deployer_type: traceData.deployer_type,
+                        factory_address: traceData.factory_address,
+                        deployment_type: traceData.deployment_type,
+                        tx_from: traceData.tx_from,
+                        tx_to: traceData.tx_to,
+                        factory_func_sig: traceData.factory_func_sig,
+                        factory_caller: traceData.factory_caller
                     }),
                     block.chainid
                 );
@@ -114,9 +114,9 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
 
         // Store the latest function signature for the callee contract
         contractCallInfo[ctx.txn.call.callee()] = ContractCallInfo({
-            callDepth: currentCallDepth,
-            traceFrom: LibString.toHexString(ctx.txn.call.caller()),
-            funcSig: LibString.toHexString(abi.encodePacked(bytes4(ctx.txn.call.callData())))
+            call_depth: currentCallDepth,
+            trace_from: LibString.toHexString(ctx.txn.call.caller()),
+            func_sig: LibString.toHexString(abi.encodePacked(bytes4(ctx.txn.call.callData())))
         });
 
         //only process if deployment trace. DO NOT PUT ANY GENERIC LOGIC BELOW THAT NEEDS TO BE TRACKED THROUGH ALL TRACES.
@@ -171,8 +171,8 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
             // after factory_address is finalized, get the function signature called on the factory.
             string memory factoryFuncSigStr;
             if (isFactory) {
-                // contractCallInfo[factoryAddress].funcSig is already a hex string
-                factoryFuncSigStr = contractCallInfo[factoryAddress].funcSig;
+                // contractCallInfo[factoryAddress].func_sig is already a hex string
+                factoryFuncSigStr = contractCallInfo[factoryAddress].func_sig;
                 if (factoryCaller != tx.origin) {
                     //we only care if it's a contract that called the factory
                     factoryCaller = ctx.txn.call.caller(); // This will be converted to string when emitting
@@ -214,22 +214,22 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
             string memory txToHex = LibString.toHexString(firstTxTo);
             
             pendingCreationTraces[calleeAddress] = CreationTraceData({
-                blockNumber: currentBlockNumber,
-                blockTimestamp: currentBlockTimestamp,
-                contractAddress: contractAddressHex,
-                initializationCodeHash: initCodeHashHex,
-                initializationCodeLength: callDataLength,
+                block_number: currentBlockNumber,
+                block_timestamp: currentBlockTimestamp,
+                contract_address: contractAddressHex,
+                initialization_code_hash: initCodeHashHex,
+                initialization_code_length: callDataLength,
                 data: dataHex,
-                isFactory: isFactory,
-                directDeploy: isDirectDeploy,
-                deployerAddress: deployerAddressHex,
-                deployerType: deployerType,
-                factoryAddress: factoryAddressHex,
-                deploymentType: call_type_string,
-                factoryFuncSig: factoryFuncSigStr,
-                factoryCaller: factoryCallerHex,
-                txFrom: txFromHex,
-                txTo: txToHex
+                is_factory: isFactory,
+                direct_deploy: isDirectDeploy,
+                deployer_address: deployerAddressHex,
+                deployer_type: deployerType,
+                factory_address: factoryAddressHex,
+                deployment_type: call_type_string,
+                factory_func_sig: factoryFuncSigStr,
+                factory_caller: factoryCallerHex,
+                tx_from: txFromHex,
+                tx_to: txToHex
             });
 
             // Mark this contract as created in this transaction

@@ -88,19 +88,19 @@ contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleO
 
         emitTraces(
             TracesData({
-                blockNumber: uint64(block.number),
-                blockTimestamp: uint64(block.timestamp),
-                txnHash: txnHashHex,
+                block_number: uint64(block.number),
+                block_timestamp: uint64(block.timestamp),
+                txn_hash: txnHashHex,
                 caller: callerHex,
                 callee: calleeHex,
-                funcSig: funcSigHex,
-                parentFuncSig: parentFunctionSignature,
-                txFrom: txFromHex,
-                txTo: txToHex,
-                callType: uint64(ctx.txn.call.callType()),
-                userOpFrom: userOpFromHex,
-                callDepth: uint64(ctx.txn.call.callDepth()),
-                traceAddress: traceAddress,
+                func_sig: funcSigHex,
+                parent_func_sig: parentFunctionSignature,
+                tx_from: txFromHex,
+                tx_to: txToHex,
+                call_type: uint64(ctx.txn.call.callType()),
+                user_op_from: userOpFromHex,
+                call_depth: uint64(ctx.txn.call.callDepth()),
+                trace_address: traceAddress,
                 success: ctx.txn.isSuccessful()
             }),
             block.chainid
