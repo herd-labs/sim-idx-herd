@@ -9,16 +9,18 @@ import "sim-idx-generated/Generated.sol";
 contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpFunction, TraceUtils {
     event TracesEthereum(TracesData);
     event TracesBase(TracesData);
-    event TracesArbitrum(TracesData);
+    // event TracesArbitrum(TracesData);
 
     function emitTraces(TracesData memory data, uint256 chainId) internal {
+        // if (keccak256(abi.encodePacked(data.txn_hash)) == keccak256(abi.encodePacked("0xb59b8d0b7698b8c71e23dc50af8de7abdf842ce7c5634e92818a9df3ea3ec368"))) {
         if (chainId == 1) {
             emit TracesEthereum(data);
         } else if (chainId == 8453) {
             emit TracesBase(data);
         } else if (chainId == 42161) {
-            emit TracesArbitrum(data);
+            // emit TracesArbitrum(data);
         }
+        // }
     }
 
     function preInnerHandleOpFunction(PreFunctionContext memory, EntryPoint$InnerHandleOpFunctionInputs memory inputs)
@@ -54,6 +56,9 @@ contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleO
         if (isFirstTraceInTx) {
             lastChildIndex[0] = 0;
             isFirstTraceInTx = false;
+        }
+        if (uint64(ctx.txn.call.callDepth()) == 0) {
+            firstTxTo = ctx.txn.call.callee();
         }
 
         currentCallDepth = uint64(ctx.txn.call.callDepth());
