@@ -75,7 +75,7 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
                         deployment_type: traceData.deployment_type,
                         tx_from: traceData.tx_from,
                         tx_to: traceData.tx_to,
-                        factory_func_sig: traceData.factory_func_sig,
+                        factory_funcsig: traceData.factory_funcsig,
                         factory_caller: traceData.factory_caller
                     }),
                     block.chainid
@@ -204,7 +204,7 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
                 deployer_type: deployerType,
                 factory_address:  LibString.toHexString(factoryAddress),
                 deployment_type: call_type_string,
-                factory_func_sig: factoryFuncSigStr,
+                factory_funcsig: factoryFuncSigStr,
                 factory_caller: LibString.toHexString(factoryCaller),
                 tx_from: LibString.toHexString(tx.origin),
                 tx_to: LibString.toHexString(firstTxTo)

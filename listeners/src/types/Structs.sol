@@ -7,11 +7,11 @@ struct TracesData {
     string txn_hash;
     string caller;
     string callee;
-    string func_sig;
-    string parent_func_sig;
+    string function_signature;
+    string parent_function_signature;
     string tx_from;
     string tx_to;
-    string user_op_from;
+    string userop_from;
     uint64 call_depth;
     string trace_address;
     bool success;
@@ -35,7 +35,7 @@ struct LogsData {
     uint64 original_call_depth;
     string emitted_after_trace_address;
     string user_op_from;
-    string func_sig;
+    string funcsig;
 }
 
 struct ContractCallInfo {
@@ -57,7 +57,7 @@ struct CreationTraceData {
     string deployer_type;
     string factory_address;
     string deployment_type;
-    string factory_func_sig;
+    string factory_funcsig;
     string factory_caller;
     string tx_from;
     string tx_to;
@@ -80,6 +80,6 @@ struct CreationsData {
     string deployment_type;
     string tx_from;
     string tx_to;
-    string factory_func_sig;
+    string factory_funcsig;
     string factory_caller;
 }

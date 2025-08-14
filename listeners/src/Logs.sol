@@ -69,7 +69,7 @@ contract LogsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpF
         data.original_call_depth = contractCallInfo[ctx.txn.call.callee()].call_depth;
         data.emitted_after_trace_address = generateTraceAddress(currentCallDepth);
         data.user_op_from = LibString.toHexString(smartAccountSender);
-        data.func_sig = contractCallInfo[ctx.txn.call.callee()].func_sig;
+        data.funcsig = contractCallInfo[ctx.txn.call.callee()].func_sig;
 
         emitLogs(
             data,
