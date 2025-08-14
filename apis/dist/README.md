@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "sim-apis-sample-app" generated at 2025-07-25T17:53:24.574Z.

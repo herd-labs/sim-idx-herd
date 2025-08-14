@@ -52,39 +52,27 @@ contract LogsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleOpF
 
     function onLog(RawLogContext memory ctx) external override {
         logIndex++;
-
-        // Break down hex conversions to avoid stack too deep
-        string memory contractAddressHex = LibString.toHexString(ctx.txn.call.callee());
-        string memory topic0Hex = ctx.topics().length > 0 ? LibString.toHexString(abi.encodePacked(ctx.topics()[0])) : "0x0000000000000000000000000000000000000000000000000000000000000000";
-        string memory topic1Hex = ctx.topics().length > 1 ? LibString.toHexString(abi.encodePacked(ctx.topics()[1])) : "0x0000000000000000000000000000000000000000000000000000000000000000";
-        string memory topic2Hex = ctx.topics().length > 2 ? LibString.toHexString(abi.encodePacked(ctx.topics()[2])) : "0x0000000000000000000000000000000000000000000000000000000000000000";
-        string memory topic3Hex = ctx.topics().length > 3 ? LibString.toHexString(abi.encodePacked(ctx.topics()[3])) : "0x0000000000000000000000000000000000000000000000000000000000000000";
-        string memory dataHex = LibString.toHexString(ctx.data());
-        string memory txnHashHex = LibString.toHexString(abi.encodePacked(ctx.txn.hash()));
-        string memory txFromHex = LibString.toHexString(tx.origin);
-        string memory txToHex = LibString.toHexString(firstTxTo);
-        string memory userOpFromHex = LibString.toHexString(smartAccountSender);
+        LogsData memory data;
+        data.contract_address = LibString.toHexString(ctx.txn.call.callee());
+        data.topic0 = ctx.topics().length > 0 ? LibString.toHexString(abi.encodePacked(ctx.topics()[0])) : "0x0000000000000000000000000000000000000000000000000000000000000000";
+        data.topic1 = ctx.topics().length > 1 ? LibString.toHexString(abi.encodePacked(ctx.topics()[1])) : "0x0000000000000000000000000000000000000000000000000000000000000000";
+        data.topic2 = ctx.topics().length > 2 ? LibString.toHexString(abi.encodePacked(ctx.topics()[2])) : "0x0000000000000000000000000000000000000000000000000000000000000000";
+        data.topic3 = ctx.topics().length > 3 ? LibString.toHexString(abi.encodePacked(ctx.topics()[3])) : "0x0000000000000000000000000000000000000000000000000000000000000000";
+        data.data = LibString.toHexString(ctx.data());
+        data.txn_hash = LibString.toHexString(abi.encodePacked(ctx.txn.hash()));
+        data.block_number = uint64(block.number);
+        data.block_timestamp = uint64(block.timestamp);
+        data.evt_index = logIndex;
+        data.trace_from = contractCallInfo[ctx.txn.call.callee()].trace_from;
+        data.tx_from = LibString.toHexString(tx.origin);
+        data.tx_to = LibString.toHexString(firstTxTo);
+        data.original_call_depth = contractCallInfo[ctx.txn.call.callee()].call_depth;
+        data.emitted_after_trace_address = generateTraceAddress(currentCallDepth);
+        data.user_op_from = LibString.toHexString(smartAccountSender);
+        data.func_sig = contractCallInfo[ctx.txn.call.callee()].func_sig;
 
         emitLogs(
-            LogsData({
-                contract_address: contractAddressHex,
-                topic0: topic0Hex,
-                topic1: topic1Hex,
-                topic2: topic2Hex,
-                topic3: topic3Hex,
-                data: dataHex,
-                txn_hash: txnHashHex,
-                block_number: uint64(block.number),
-                block_timestamp: uint64(block.timestamp),
-                evt_index: logIndex,
-                trace_from: contractCallInfo[ctx.txn.call.callee()].trace_from,
-                tx_from: txFromHex,
-                tx_to: txToHex,
-                original_call_depth: contractCallInfo[ctx.txn.call.callee()].call_depth,
-                emitted_after_trace_address: generateTraceAddress(currentCallDepth),
-                user_op_from: userOpFromHex,
-                func_sig: contractCallInfo[ctx.txn.call.callee()].func_sig
-            }),
+            data,
             block.chainid
         );
     }

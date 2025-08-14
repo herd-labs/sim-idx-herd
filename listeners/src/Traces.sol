@@ -64,11 +64,6 @@ contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleO
         // Process trace address and update indices
         string memory traceAddress = processTraceAddress(ctx.txn.call.callee(), uint64(ctx.txn.call.callDepth()));
 
-        // Update function signature mappings
-        bytes4 parentFunctionSignatureBytes =
-            updateFunctionSignatures(uint64(ctx.txn.call.callDepth()), ctx.txn.call.callData());
-        string memory parentFunctionSignature = LibString.toHexString(abi.encodePacked(parentFunctionSignatureBytes));
-
         if (uint64(ctx.txn.call.callType()) == 3) {
             caller = ctx.txn.call.delegator();
             callee = ctx.txn.call.delegatee();
@@ -77,28 +72,19 @@ contract TracesListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHandleO
             callee = ctx.txn.call.callee();
         }
 
-        // Break down hex conversions to avoid stack too deep
-        string memory txnHashHex = LibString.toHexString(abi.encodePacked(ctx.txn.hash()));
-        string memory callerHex = LibString.toHexString(caller);
-        string memory calleeHex = LibString.toHexString(callee);
-        string memory funcSigHex = LibString.toHexString(abi.encodePacked(bytes4(ctx.txn.call.callData())));
-        string memory txFromHex = LibString.toHexString(tx.origin);
-        string memory txToHex = LibString.toHexString(firstTxTo);
-        string memory userOpFromHex = LibString.toHexString(smartAccountSender);
-
         emitTraces(
             TracesData({
                 block_number: uint64(block.number),
                 block_timestamp: uint64(block.timestamp),
-                txn_hash: txnHashHex,
-                caller: callerHex,
-                callee: calleeHex,
-                func_sig: funcSigHex,
-                parent_func_sig: parentFunctionSignature,
-                tx_from: txFromHex,
-                tx_to: txToHex,
+                txn_hash: LibString.toHexString(abi.encodePacked(ctx.txn.hash())),
+                caller: LibString.toHexString(caller),
+                callee: LibString.toHexString(callee),
+                func_sig: LibString.toHexString(abi.encodePacked(bytes4(ctx.txn.call.callData()))),
+                parent_func_sig: LibString.toHexString(abi.encodePacked(updateFunctionSignatures(uint64(ctx.txn.call.callDepth()), ctx.txn.call.callData()))),
+                tx_from: LibString.toHexString(tx.origin),
+                tx_to: LibString.toHexString(firstTxTo),
                 call_type: uint64(ctx.txn.call.callType()),
-                user_op_from: userOpFromHex,
+                user_op_from: LibString.toHexString(smartAccountSender),
                 call_depth: uint64(ctx.txn.call.callDepth()),
                 trace_address: traceAddress,
                 success: ctx.txn.isSuccessful()
