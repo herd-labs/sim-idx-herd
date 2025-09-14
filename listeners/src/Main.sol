@@ -19,9 +19,13 @@ contract Triggers is BaseTriggers {
         // logsTriggers(Chains.Ethereum, 23132322);
         // creationsTriggers(Chains.Ethereum, 23132322);
 
-        tracesTriggers(Chains.Arbitrum, 1);
-        logsTriggers(Chains.Arbitrum, 1);
-        creationsTriggers(Chains.Arbitrum, 1);
+        // tracesTriggers(Chains.Arbitrum, 1);
+        // logsTriggers(Chains.Arbitrum, 1);
+        // creationsTriggers(Chains.Arbitrum, 1);
+
+        tracesTriggers(Chains.WorldChain, 1);
+        logsTriggers(Chains.WorldChain, 1);
+        creationsTriggers(Chains.WorldChain, 1);
     }
 
     function tracesTriggers(Chains chain, uint64 startBlock) internal {

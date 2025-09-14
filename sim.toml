@@ -19,7 +19,7 @@ brokers = ["pkc-619z3.us-east1.gcp.confluent.cloud:9092"]
   CreationsBase = "base_creation_traces" 
   LogsBase = "base_logs"
 
-  TracesArbitrum = "arbitrum_traces" 
-  CreationsArbitrum = "arbitrum_creation_traces" 
-  LogsArbitrum = "arbitrum_logs"
+  TracesWorld = "worldcoin_traces" 
+  CreationsWorld = "worldcoin_creation_traces" 
+  LogsWorld = "worldcoin_logs"
 
