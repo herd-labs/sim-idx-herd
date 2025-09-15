@@ -11,21 +11,21 @@ import "./Creations.sol";
 contract Triggers is BaseTriggers {
     function triggers() external virtual override {
         // //we'll specify a specific block number to start from
-        // tracesTriggers(Chains.Base, 34150555);
-        // logsTriggers(Chains.Base, 34150555);
-        // creationsTriggers(Chains.Base, 34150555);
+        tracesTriggers(Chains.Base, 35557750);
+        logsTriggers(Chains.Base, 35557750);
+        creationsTriggers(Chains.Base, 35557750);
 
-        // tracesTriggers(Chains.Ethereum, 23132322);
-        // logsTriggers(Chains.Ethereum, 23132322);
-        // creationsTriggers(Chains.Ethereum, 23132322);
+        tracesTriggers(Chains.Ethereum, 23365626);
+        logsTriggers(Chains.Ethereum, 23365626);
+        creationsTriggers(Chains.Ethereum, 23365626);
 
         // tracesTriggers(Chains.Arbitrum, 1);
         // logsTriggers(Chains.Arbitrum, 1);
         // creationsTriggers(Chains.Arbitrum, 1);
 
-        tracesTriggers(Chains.WorldChain, 1);
-        logsTriggers(Chains.WorldChain, 1);
-        creationsTriggers(Chains.WorldChain, 1);
+        tracesTriggers(Chains.WorldChain, 19281048);
+        logsTriggers(Chains.WorldChain, 19281048);
+        creationsTriggers(Chains.WorldChain, 19281048);
     }
 
     function tracesTriggers(Chains chain, uint64 startBlock) internal {
