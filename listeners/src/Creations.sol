@@ -27,7 +27,7 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
     event CreationsEthereum(CreationsData);
     event CreationsBase(CreationsData);
     // event CreationsArbitrum(CreationsData);
-    event CreationsWorldChain(CreationsData);
+    event CreationsWorld(CreationsData);
 
     function emitCreations(CreationsData memory data, uint256 chainId) internal {
         if (chainId == 1) {
@@ -37,7 +37,7 @@ contract CreationsListener is Raw$OnCall, Raw$OnPreCall, EntryPoint$PreInnerHand
         } else if (chainId == 42161) {
             // emit CreationsArbitrum(data);
         } else if (chainId == 480) {
-            emit CreationsWorldChain(data);
+            emit CreationsWorld(data);
         }
     }
 
